@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Pradhisha-N/retest-jenkins-1.git'
+                git url: 'https://github.com/Pradhisha-N/retest-jenkins-1.git', branch: 'main'
             }
         }
 

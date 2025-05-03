@@ -11,6 +11,16 @@ pipeline {
                 git url: 'https://github.com/Pradhisha-N/retest-jenkins-1.git', branch: 'main'
             }
         }
+        stage('Install venv (Debian/Ubuntu)') {
+            steps {
+                sh '''
+                    if ! python3 -m venv --help > /dev/null 2>&1; then
+                        sudo apt update
+                        sudo apt install -y python3.10-venv
+                    fi
+                '''
+            }
+        }
 
         stage('Set Up Environment') {
             steps {

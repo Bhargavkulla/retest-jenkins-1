@@ -7,6 +7,18 @@ pipeline {
                 sh 'pip3 install -r requirements.txt'
             }
         }
+        stage('Check Python') {
+            steps {
+                sh '''
+                    which python3
+                    python3 --version
+                    which pip3
+                    pip3 --version
+                    pip3 show pytest
+                '''
+            }
+        }
+
 
         stage('Run Tests') {
             steps {

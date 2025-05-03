@@ -12,17 +12,19 @@ pipeline {
             }
         }
 
-        stage('Set Up Virtual Environment') {
+        stage('Install virtualenv and Set Up Virtual Environment') {
             steps {
                 sh '''
-                    # Check if python3-venv is installed
-                    if ! python3 -m venv --help > /dev/null 2>&1; then
-                        echo "python3-venv is not installed. Please install it first." && exit 1
-                    fi
-                    # Create a virtual environment
-                    python3 -m venv $VENV
-                    # Upgrade pip and install dependencies
+                    # Install virtualenv if it's not installed
+                    python3 -m pip install --user virtualenv
+                    
+                    # Create the virtual environment using virtualenv
+                    python3 -m virtualenv $VENV
+                    
+                    # Upgrade pip inside the virtual environment
                     $VENV/bin/pip install --upgrade pip
+                    
+                    # Install dependencies from requirements.txt
                     $VENV/bin/pip install -r requirements.txt
                 '''
             }
@@ -31,7 +33,7 @@ pipeline {
         stage('Run Pytest') {
             steps {
                 sh '''
-                    # Run pytest within the virtual environment
+                    # Run pytest inside the virtual environment
                     $VENV/bin/python -m pytest
                 '''
             }
@@ -39,14 +41,14 @@ pipeline {
 
         stage('Publish Test Results') {
             steps {
-                junit '**/test-*.xml' // Adjust this if your tests generate a specific test report file
+                junit '**/test-*.xml'  // Modify this if your test reports are in a different format or location
             }
         }
     }
 
     post {
         always {
-            // Clean up by removing the virtual environment
+            // Clean up by removing the virtual environment after the pipeline finishes
             sh 'rm -rf $VENV || true'
         }
     }

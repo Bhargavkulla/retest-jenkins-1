@@ -33,15 +33,15 @@ pipeline {
         stage('Run Pytest') {
             steps {
                 sh '''
-                    # Run pytest inside the virtual environment
-                    $VENV/bin/python -m pytest
+                    # Run pytest and generate a JUnit XML report
+                    $VENV/bin/python -m pytest --junitxml=pytest-report.xml
                 '''
             }
         }
 
         stage('Publish Test Results') {
             steps {
-                junit '**/test-*.xml'  // Modify this if your test reports are in a different format or location
+                junit '**/pytest-report.xml'  // Look for the generated XML report
             }
         }
     }

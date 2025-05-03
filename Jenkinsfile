@@ -15,10 +15,9 @@ pipeline {
         stage('Install venv (Debian/Ubuntu)') {
             steps {
                 sh '''
-                    if ! python3 -m venv --help > /dev/null 2>&1; then
-                        sudo apt update
-                        sudo apt install -y python3.10-venv
-                    fi
+                    # Update package list and install python3-venv (not version-specific)
+                    apt update || true
+                    apt install -y python3-venv || true
                 '''
             }
         }
@@ -27,7 +26,6 @@ pipeline {
             steps {
                 sh '''
                     python3 -m venv $VENV
-                    . $VENV/bin/activate
                     $VENV/bin/pip install --upgrade pip
                     $VENV/bin/pip install -r requirements.txt
                 '''

@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.10'  // You can also use python:3.11
-        }
-    }
+    agent any
 
     environment {
         VENV = 'venv'
@@ -16,43 +12,42 @@ pipeline {
             }
         }
 
-        stage('Set Up Environment') {
+        stage('Set Up Virtual Environment') {
             steps {
                 sh '''
-                    python -m venv $VENV
+                    # Check if python3-venv is installed
+                    if ! python3 -m venv --help > /dev/null 2>&1; then
+                        echo "python3-venv is not installed. Please install it first." && exit 1
+                    fi
+                    # Create a virtual environment
+                    python3 -m venv $VENV
+                    # Upgrade pip and install dependencies
                     $VENV/bin/pip install --upgrade pip
                     $VENV/bin/pip install -r requirements.txt
                 '''
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Pytest') {
             steps {
                 sh '''
+                    # Run pytest within the virtual environment
                     $VENV/bin/python -m pytest
                 '''
             }
         }
 
-        stage('Coverage Report') {
+        stage('Publish Test Results') {
             steps {
-                sh '''
-                    $VENV/bin/coverage run -m pytest
-                    $VENV/bin/coverage report
-                    $VENV/bin/coverage html
-                '''
-                publishHTML(target: [
-                    reportDir: 'htmlcov',
-                    reportFiles: 'index.html',
-                    reportName: 'Coverage Report'
-                ])
+                junit '**/test-*.xml' // Adjust this if your tests generate a specific test report file
             }
         }
     }
 
     post {
         always {
-            sh 'rm -rf $VENV'
+            // Clean up by removing the virtual environment
+            sh 'rm -rf $VENV || true'
         }
     }
 }

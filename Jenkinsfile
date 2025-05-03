@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10'  // You can also use python:3.11
+        }
+    }
 
     environment {
         VENV = 'venv'
@@ -12,20 +16,10 @@ pipeline {
             }
         }
 
-        stage('Install venv (Debian/Ubuntu)') {
-            steps {
-                sh '''
-                    # Update package list and install python3-venv (not version-specific)
-                    apt update || true
-                    apt install -y python3-venv || true
-                '''
-            }
-        }
-
         stage('Set Up Environment') {
             steps {
                 sh '''
-                    python3 -m venv $VENV
+                    python -m venv $VENV
                     $VENV/bin/pip install --upgrade pip
                     $VENV/bin/pip install -r requirements.txt
                 '''
